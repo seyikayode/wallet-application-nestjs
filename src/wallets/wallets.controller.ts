@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { WalletsService } from './wallets.service';
 import { DepositDto, WithdrawDto, TransferDto } from './dto/wallet.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('wallet')
 @ApiBearerAuth()
@@ -26,6 +27,7 @@ export class WalletsController {
   };
 
   @Post('deposit')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({ summary: 'Deposit funds to wallet' })
   @ApiResponse({ status: 201, description: 'Deposit initiated successfully' })
   deposit(@Request() req, @Body() depositDto: DepositDto) {
@@ -33,6 +35,7 @@ export class WalletsController {
   };
 
   @Post('withdraw')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Withdraw funds from wallet' })
   @ApiResponse({ status: 201, description: 'Withdrawal initiated successfully' })
   withdraw(@Request() req, @Body() withdrawDto: WithdrawDto) {
@@ -40,6 +43,7 @@ export class WalletsController {
   };
 
   @Post('transfer')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Transfer funds to another wallet' })
   @ApiResponse({ status: 200, description: 'Transfer initiated successfully' })
   transfer(@Request() req, @Body() transferDto: TransferDto) {
